@@ -1,0 +1,65 @@
+!pip3 install torch torchvision torchaudio -f https://download.pytorch.org/whl/lts/1.8/torch_lts.html
+
+!pip install ibm_watson
+
+!pip install transformers ipywidgets gradio --upgrade
+
+from transformers import pipeline   # Transformers pipeline https://huggingface.co/models?search
+
+url = 'https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/37aff025-4615-48e7-ba34-cb86f63008ec'
+apikey ='pCSBVwxd6xsA0c8uWpuJLVQBEqiPxsPcbD463AP5yhE_'
+
+from ibm_watson import TextToSpeechV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+
+# 1. AUTHENTICATE https://cloud.ibm.com/ Text to Audio
+
+# Setup Service
+authenticator = IAMAuthenticator (apikey)
+# New TTS Service
+tts = TextToSpeechV1 (authenticator=authenticator)
+#Set Service URL
+tts.set_service_url(url)
+
+# Load Up Pipeline translation Text to Text 
+#https://huggingface.co/models?search
+
+translation_pipeline = pipeline('translation_en_to_fr')
+
+resultsTranslate = translation_pipeline('Hello. How are You? ')
+
+resultsTranslate[0]['translation_text']
+
+
+## CONVERT OUTPOUT IN A TEXT
+print (resultsTranslate)
+
+value =(resultsTranslate[0])
+ 
+print(value)
+
+value2=value['translation_text']
+
+print(value2)
+
+value3 =str(value2)
+
+with open("resultsTranslate.txt","w") as f:
+    f.write(value3)
+    
+  <h1>CONVERT to VOICE from a TEXT FILE</h1>
+  
+with open("resultsTranslate.txt","r") as f:
+    text= f.readlines()
+    
+text
+
+text = [line.replace('\n' , ' ')for line in text]
+text = [line.replace('\xa0', ' ')for line in text]
+text = ''.join(str(line) for line in text)
+
+text
+
+with open("resultsTranslate.mp3","wb") as audio_file:
+    res = tts.synthesize(text, accept = 'audio/mp3', voice = 'fr-FR_NicolasV3Voice').get_result()
+    audio_file.write(res.content)
